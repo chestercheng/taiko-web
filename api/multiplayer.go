@@ -23,7 +23,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type User struct {
-	Ws        **websocket.Conn
+	Ws        *websocket.Conn
 	Action    string
 	Session   string
 	OtherUser *User
@@ -57,13 +57,13 @@ func (u *User) GameEnd() {
 	gameend := models.Message{Type: "gameend"}
 
 	if u.OtherUser != nil {
-		(*u.OtherUser.Ws).WriteJSON(&gameend)
+		u.OtherUser.Ws.WriteJSON(&gameend)
 		u.OtherUser.Action = "ready"
 		u.OtherUser.Session = ""
 		u.OtherUser.OtherUser = nil
 	}
 
-	(*u.Ws).WriteJSON(&gameend)
+	u.Ws.WriteJSON(&gameend)
 	u.Action = "ready"
 	u.Session = ""
 	u.OtherUser = nil
@@ -77,7 +77,7 @@ func MultiplayerHandler(c *gin.Context) {
 	}
 	defer ws.Close()
 
-	user := User{Ws: &ws, Action: "ready"}
+	user := User{Ws: ws, Action: "ready"}
 	serverStatus.Users = append(serverStatus.Users, &user)
 
 	for {
@@ -95,7 +95,7 @@ func MultiplayerHandler(c *gin.Context) {
 				if msg.Value == nil {
 					// Session invite link requested
 					user.CreateSession()
-					(*user.Ws).WriteJSON(models.Message{"invite", user.Session})
+					user.Ws.WriteJSON(models.Message{"invite", user.Session})
 				} else if _, ok := serverStatus.Invites[msg.Value.(string)]; ok {
 					// Join a session with the other user
 					user.OtherUser = serverStatus.Invites[msg.Value.(string)]
@@ -106,8 +106,8 @@ func MultiplayerHandler(c *gin.Context) {
 					user.Session = msg.Value.(string)
 
 					res := models.Message{Type: "session"}
-					(*user.OtherUser.Ws).WriteJSON(&res)
-					(*user.Ws).WriteJSON(&res)
+					user.OtherUser.Ws.WriteJSON(&res)
+					user.Ws.WriteJSON(&res)
 				} else {
 					// Session code is invalid
 					user.GameEnd()
@@ -125,7 +125,7 @@ func MultiplayerHandler(c *gin.Context) {
 
 				// Wait for another user
 				user.Action = "waiting"
-				(*user.Ws).WriteJSON(models.Message{Type: "waiting"})
+				user.Ws.WriteJSON(models.Message{Type: "waiting"})
 			}
 		case "invite":
 			switch msg.Type {
@@ -141,8 +141,8 @@ func MultiplayerHandler(c *gin.Context) {
 				user.Action = "songsel"
 
 				res := models.Message{Type: "songsel"}
-				(*user.OtherUser.Ws).WriteJSON(&res)
-				(*user.Ws).WriteJSON(&res)
+				user.OtherUser.Ws.WriteJSON(&res)
+				user.Ws.WriteJSON(&res)
 			}
 		case "songsel":
 			// Session song selection
@@ -155,8 +155,8 @@ func MultiplayerHandler(c *gin.Context) {
 			switch msg.Type {
 			case "songsel":
 				// Change song select position
-				(*user.OtherUser.Ws).WriteJSON(msg)
-				(*user.Ws).WriteJSON(msg)
+				user.OtherUser.Ws.WriteJSON(msg)
+				user.Ws.WriteJSON(msg)
 			case "join":
 				// Start game
 				if msg.Value == nil {
@@ -174,14 +174,14 @@ func MultiplayerHandler(c *gin.Context) {
 					user.Action = "loading"
 
 					res := models.Message{"gameload", diff}
-					(*user.OtherUser.Ws).WriteJSON(&res)
-					(*user.Ws).WriteJSON(&res)
+					user.OtherUser.Ws.WriteJSON(&res)
+					user.Ws.WriteJSON(&res)
 				} else {
 					user.Action = "waiting"
 
 					var val []map[string]interface{}
 					val = append(val, map[string]interface{}{"id": id, "diff": diff})
-					(*user.OtherUser.Ws).WriteJSON(models.Message{"users", val})
+					user.OtherUser.Ws.WriteJSON(models.Message{"users", val})
 				}
 			case "gameend":
 				// User wants to disconnect
@@ -198,7 +198,7 @@ func MultiplayerHandler(c *gin.Context) {
 				}
 
 				if user.Session != "" {
-					(*user.OtherUser.Ws).WriteJSON(models.Message{Type: "users"})
+					user.OtherUser.Ws.WriteJSON(models.Message{Type: "users"})
 					user.Action = "songsel"
 				} else {
 					user.Action = "ready"
@@ -213,8 +213,8 @@ func MultiplayerHandler(c *gin.Context) {
 				user.Action = "playing"
 
 				res := models.Message{Type: "gamestart"}
-				(*user.OtherUser.Ws).WriteJSON(&res)
-				(*user.Ws).WriteJSON(&res)
+				user.OtherUser.Ws.WriteJSON(&res)
+				user.Ws.WriteJSON(&res)
 			}
 		case "playing":
 			if user.OtherUser == nil {
@@ -224,18 +224,18 @@ func MultiplayerHandler(c *gin.Context) {
 			}
 			switch msg.Type {
 			case "note", "drumroll", "branch", "gameresults":
-				(*user.OtherUser.Ws).WriteJSON(msg)
+				user.OtherUser.Ws.WriteJSON(msg)
 			case "songsel":
 				user.OtherUser.Action = "songsel"
 				user.Action = "songsel"
 
 				res := models.Message{Type: "songsel"}
-				(*user.OtherUser.Ws).WriteJSON(&res)
-				(*user.Ws).WriteJSON(&res)
+				user.OtherUser.Ws.WriteJSON(&res)
+				user.Ws.WriteJSON(&res)
 
 				res.Type = "users"
-				(*user.OtherUser.Ws).WriteJSON(&res)
-				(*user.Ws).WriteJSON(&res)
+				user.OtherUser.Ws.WriteJSON(&res)
+				user.Ws.WriteJSON(&res)
 			case "gameend":
 				// User wants to disconnect
 				user.GameEnd()
