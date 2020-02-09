@@ -4,7 +4,7 @@ FROM golang:1.13-alpine AS build-env
 ADD . /src
 
 RUN apk --update upgrade && \
-    apk add gcc libc-dev postgresql-libs sqlite-libs && \
+    apk add gcc openssl libc-dev postgresql-libs sqlite-libs && \
     rm -rf /var/cache/apk/* && \
     # See http://stackoverflow.com/questions/34729748/installed-go-binary-not-found-in-path-on-alpine-linux-docker
     mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2

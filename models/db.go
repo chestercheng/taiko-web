@@ -32,7 +32,7 @@ type Songs struct {
 	Ura          *string  `sql:"ura"`
 	Enabled      int      `sql:"enabled" gorm:"not null"`
 	Category     *int     `sql:"category"`
-	Type         *string  `sql:"type"`
+	Type         *string  `sql:"type" gorm:"type:text"`
 	Offset       *float32 `sql:"offset"`
 	SkinId       *int     `sql:"skin_id"`
 	Preview      *float32 `sql:"preview"`

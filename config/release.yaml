@@ -1,0 +1,10 @@
+url: "brb9000"
+port: "8080"
+
+db:
+  dialect: "postgres"
+  conn_string: "host=brb9000 port=5432 user=gorm dbname=taiko-web sslmode=disable password=password"
+
+web:
+  assets_baseurl: "/assets/"
+  songs_baseurl: "/songs/"
