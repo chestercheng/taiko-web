@@ -1,0 +1,10 @@
+url: "127.0.0.1"
+port: "8080"
+
+db:
+  dialect: "sqlite3"
+  conn_string: "taiko.db"
+
+web:
+  assets_baseurl: "/assets/"
+  songs_baseurl: "/songs/"
