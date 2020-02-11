@@ -28,19 +28,19 @@ func SongsHandler(c *gin.Context) {
 			db.Table("song_skins").Where("id = ?", song.SkinId).Find(&songSkin)
 		}
 		songs = append(songs, models.Song{
-			song.ID,
-			song.Title,
-			song.TitleLang,
-			song.Subtitle,
-			song.SubtitleLang,
-			[]*string{song.Easy, song.Normal, song.Hard, song.Oni, song.Ura},
-			song.Preview,
-			song.CategoryName,
-			song.Type,
-			song.Offset,
-			songSkin,
-			song.Volume,
-			maker,
+			ID:           song.ID,
+			Title:        song.Title,
+			TitleLang:    song.TitleLang,
+			Subtitle:     song.Subtitle,
+			SubtitleLang: song.SubtitleLang,
+			Stars:        []*string{song.Easy, song.Normal, song.Hard, song.Oni, song.Ura},
+			Preview:      song.Preview,
+			Category:     song.CategoryName,
+			Type:         song.Type,
+			Offset:       song.Offset,
+			SongSkin:     songSkin,
+			Volume:       song.Volume,
+			Maker:        maker,
 		})
 	}
 

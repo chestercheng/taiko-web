@@ -95,7 +95,7 @@ func MultiplayerHandler(c *gin.Context) {
 				if msg.Value == nil {
 					// Session invite link requested
 					user.CreateSession()
-					user.Ws.WriteJSON(models.Message{"invite", user.Session})
+					user.Ws.WriteJSON(models.Message{Type: "invite", Value: user.Session})
 				} else if _, ok := serverStatus.Invites[msg.Value.(string)]; ok {
 					// Join a session with the other user
 					user.OtherUser = serverStatus.Invites[msg.Value.(string)]
@@ -173,7 +173,7 @@ func MultiplayerHandler(c *gin.Context) {
 					user.OtherUser.Action = "loading"
 					user.Action = "loading"
 
-					res := models.Message{"gameload", diff}
+					res := models.Message{Type: "gameload", Value: diff}
 					user.OtherUser.Ws.WriteJSON(&res)
 					user.Ws.WriteJSON(&res)
 				} else {
@@ -181,7 +181,7 @@ func MultiplayerHandler(c *gin.Context) {
 
 					var val []map[string]interface{}
 					val = append(val, map[string]interface{}{"id": id, "diff": diff})
-					user.OtherUser.Ws.WriteJSON(models.Message{"users", val})
+					user.OtherUser.Ws.WriteJSON(models.Message{Type: "users", Value: val})
 				}
 			case "gameend":
 				// User wants to disconnect
