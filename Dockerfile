@@ -1,6 +1,8 @@
 # build stage
 FROM golang:1.13-alpine AS build-env
 
+ARG BUILD_FLAGS
+
 ADD . /src
 
 RUN apk --update upgrade && \
@@ -9,7 +11,8 @@ RUN apk --update upgrade && \
     # See http://stackoverflow.com/questions/34729748/installed-go-binary-not-found-in-path-on-alpine-linux-docker
     mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
-RUN cd /src && CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o app
+RUN cd /src && \
+    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "${BUILD_FLAGS}" -o app
 
 
 # final stage

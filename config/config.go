@@ -13,9 +13,9 @@ type Version struct {
 }
 
 type WebConfig struct {
-	AssetsBaseurl string  `json:"assets_baseurl"`
-	SongsBaseurl  string  `json:"songs_baseurl"`
-	Version       Version `json:"_version"`
+	AssetsBaseurl string   `json:"assets_baseurl"`
+	SongsBaseurl  string   `json:"songs_baseurl"`
+	Version       *Version `json:"_version"`
 }
 
 type DBConfig struct {
@@ -28,7 +28,12 @@ type TaikoWebConfig struct {
 	DB         DBConfig
 }
 
-var config TaikoWebConfig
+var (
+	version string
+	commit  string
+	url     string
+	config  TaikoWebConfig
+)
 
 func Init(mode string) {
 	var err error
@@ -42,12 +47,20 @@ func Init(mode string) {
 		log.Fatal("error on parsing configuration file")
 	}
 
+	var ver Version
+	ver.Version = version
+	if commit != "" {
+		ver.Commit = commit
+		ver.CommitShort = commit[:7]
+	}
+	ver.Url = url
+
 	config.Mode = mode
 	config.Port = configFile.GetString("port")
 	config.Web = WebConfig{
 		configFile.GetString("web.assets_baseurl"),
 		configFile.GetString("web.songs_baseurl"),
-		Version{Url: configFile.GetString("url")},
+		&ver,
 	}
 	config.DB = DBConfig{
 		configFile.GetString("db.dialect"),
